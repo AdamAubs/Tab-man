@@ -1,22 +1,41 @@
 <script lang="ts">
-	import Header from './Header.svelte';
+	import { invalidate } from '$app/navigation';
+	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 	import '../app.css';
+	import Header from './Header.svelte';
 
-	let { children } = $props();
+	let { children, data } = $props();
+	let { session, supabase } = $derived(data);
+	let user = $derived(session?.user);
+
+	let isAuthPage = $derived(page.url.pathname.startsWith('/auth'));
+
+	onMount(() => {
+		const { data: authListener } = supabase.auth.onAuthStateChange((_, newSession) => {
+			if (newSession?.expires_at !== session?.expires_at) {
+				invalidate('supabase:auth');
+			}
+		});
+
+		return () => authListener.subscription.unsubscribe();
+	});
 </script>
 
 <div class="app">
-	<Header />
+	{#if !isAuthPage}
+		<Header {user} />
+	{/if}
 
-	<main>
+	<main class:full-height={isAuthPage}>
 		{@render children()}
 	</main>
 
-	<footer>
-		<p>
-			visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to learn about SvelteKit
-		</p>
-	</footer>
+	{#if !isAuthPage}
+		<footer>
+			<p>Who got the tab?</p>
+		</footer>
+	{/if}
 </div>
 
 <style>
@@ -43,10 +62,6 @@
 		justify-content: center;
 		align-items: center;
 		padding: 12px;
-	}
-
-	footer a {
-		font-weight: bold;
 	}
 
 	@media (min-width: 480px) {

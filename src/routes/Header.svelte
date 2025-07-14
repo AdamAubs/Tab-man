@@ -1,129 +1,262 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import logo from '$lib/images/svelte-logo.svg';
-	import github from '$lib/images/github.svg';
+	import { Menu, User, LogOut } from 'lucide-svelte';
+	import Sidebar from '../lib/components/Sidebar.svelte';
+
+	let { user } = $props();
+
+	let sidebarOpen = $state(false);
+	let userMenuOpen = $state(false);
+
+	function toggleSidebar() {
+		sidebarOpen = !sidebarOpen;
+		userMenuOpen = false; // Close user menu when opening sidebar
+	}
+
+	function closeSidebar() {
+		sidebarOpen = false;
+	}
+
+	function toggleUserMenu() {
+		userMenuOpen = !userMenuOpen;
+		sidebarOpen = false; // Close sidebar when opening user menu
+	}
+
+	// Close menus when clicking outside
+	function handleOutsideClick() {
+		userMenuOpen = false;
+	}
 </script>
 
+<svelte:window onclick={handleOutsideClick} />
+
 <header>
-	<div class="corner">
-		<a href="https://svelte.dev/docs/kit">
-			<img src={logo} alt="SvelteKit" />
-		</a>
+	<div class="header-left">
+		{#if user}
+			<button class="menu-btn" onclick={toggleSidebar} aria-label="Open sidebar">
+				<Menu size={24} />
+			</button>
+		{/if}
+		
+		<div class="logo">
+			<a href="/">Tab Man</a>
+		</div>
 	</div>
 
-	<nav>
-		<svg viewBox="0 0 2 3" aria-hidden="true">
-			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
-		</svg>
-		<ul>
-			<li aria-current={page.url.pathname === '/' ? 'page' : undefined}>
-				<a href="/">Home</a>
-			</li>
-			<li aria-current={page.url.pathname === '/about' ? 'page' : undefined}>
-				<a href="/about">About</a>
-			</li>
-			<li aria-current={page.url.pathname.startsWith('/sverdle') ? 'page' : undefined}>
-				<a href="/sverdle">Sverdle</a>
-			</li>
-		</ul>
-		<svg viewBox="0 0 2 3" aria-hidden="true">
-			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
-		</svg>
-	</nav>
-
-	<div class="corner">
-		<a href="https://github.com/sveltejs/kit">
-			<img src={github} alt="GitHub" />
-		</a>
+	<div class="header-right">
+		{#if user}
+			<div class="user-menu-container">
+				<button 
+					class="user-menu-btn" 
+					onclick={toggleUserMenu}
+					aria-label="User menu"
+					class:active={userMenuOpen}
+				>
+					<User size={20} />
+				</button>
+				
+				{#if userMenuOpen}
+					<div 
+						class="user-menu" 
+						onclick={(e) => e.stopPropagation()}
+						onkeydown={(e) => {
+							if (e.key === 'Escape') userMenuOpen = false;
+						}}
+						role="menu"
+						tabindex="-1"
+					>
+						<div class="user-info">
+							<div class="user-email">{user.email}</div>
+							{#if user.user_metadata?.display_name}
+								<div class="user-name">{user.user_metadata.display_name}</div>
+							{/if}
+						</div>
+						<hr />
+						<form method="POST" action="/auth?/logout">
+							<button type="submit" class="logout-btn">
+								<LogOut size={16} />
+								<span>Sign Out</span>
+							</button>
+						</form>
+					</div>
+				{/if}
+			</div>
+		{:else}
+			<a href="/auth" class="sign-in-link">Sign In</a>
+		{/if}
 	</div>
+
+	<Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 </header>
 
 <style>
 	header {
 		display: flex;
 		justify-content: space-between;
-	}
-
-	.corner {
-		width: 3em;
-		height: 3em;
-	}
-
-	.corner a {
-		display: flex;
 		align-items: center;
-		justify-content: center;
-		width: 100%;
-		height: 100%;
-	}
-
-	.corner img {
-		width: 2em;
-		height: 2em;
-		object-fit: contain;
-	}
-
-	nav {
-		display: flex;
-		justify-content: center;
-		--background: rgba(255, 255, 255, 0.7);
-	}
-
-	svg {
-		width: 2em;
-		height: 3em;
-		display: block;
-	}
-
-	path {
-		fill: var(--background);
-	}
-
-	ul {
-		position: relative;
-		padding: 0;
-		margin: 0;
-		height: 3em;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		list-style: none;
-		background: var(--background);
-		background-size: contain;
-	}
-
-	li {
-		position: relative;
-		height: 100%;
-	}
-
-	li[aria-current='page']::before {
-		--size: 6px;
-		content: '';
-		width: 0;
-		height: 0;
-		position: absolute;
+		padding: 0 1rem;
+		height: 4rem;
+		background: var(--color-bg-0);
+		border-bottom: 1px solid var(--color-bg-2);
+		position: sticky;
 		top: 0;
-		left: calc(50% - var(--size));
-		border: var(--size) solid transparent;
-		border-top: var(--size) solid var(--color-theme-1);
+		z-index: 100;
 	}
 
-	nav a {
+	.header-left {
 		display: flex;
-		height: 100%;
 		align-items: center;
-		padding: 0 0.5rem;
-		color: var(--color-text);
-		font-weight: 700;
-		font-size: 0.8rem;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		text-decoration: none;
-		transition: color 0.2s linear;
+		gap: 1rem;
 	}
 
-	a:hover {
+	.menu-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		background: none;
+		border: none;
+		color: var(--color-text);
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.menu-btn:hover {
+		background: var(--color-bg-1);
 		color: var(--color-theme-1);
+	}
+
+	.logo {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: var(--color-theme-1);
+	}
+
+	.logo a {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.header-right {
+		display: flex;
+		align-items: center;
+	}
+
+	.sign-in-link {
+		padding: 0.5rem 1rem;
+		background: var(--color-theme-1);
+		color: white;
+		text-decoration: none;
+		border-radius: 8px;
+		font-weight: 600;
+		font-size: 0.875rem;
+		transition: all 0.2s ease;
+	}
+
+	.sign-in-link:hover {
+		background: var(--color-theme-2);
+		transform: translateY(-1px);
+	}
+
+	.user-menu-container {
+		position: relative;
+	}
+
+	.user-menu-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		background: none;
+		border: none;
+		color: var(--color-text);
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.user-menu-btn:hover,
+	.user-menu-btn.active {
+		background: var(--color-bg-1);
+		color: var(--color-theme-1);
+	}
+
+	.user-menu {
+		position: absolute;
+		top: calc(100% + 0.5rem);
+		right: 0;
+		min-width: 200px;
+		background: var(--color-bg-0);
+		border: 1px solid var(--color-bg-2);
+		border-radius: 12px;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+		padding: 0.75rem 0;
+		z-index: 1000;
+	}
+
+	.user-info {
+		padding: 0.5rem 1rem 0.75rem;
+	}
+
+	.user-email {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text);
+		margin-bottom: 0.25rem;
+	}
+
+	.user-name {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+	}
+
+	.user-menu hr {
+		margin: 0.5rem 0;
+		border: none;
+		border-top: 1px solid var(--color-bg-2);
+	}
+
+	.user-menu form {
+		margin: 0;
+	}
+
+	.logout-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.5rem 1rem;
+		background: none;
+		border: none;
+		color: var(--color-text);
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+		text-align: left;
+	}
+
+	.logout-btn:hover {
+		background: var(--color-bg-1);
+		color: rgb(185, 28, 28);
+	}
+
+	.logout-btn :global(svg) {
+		color: inherit;
+	}
+
+	/* Mobile responsiveness */
+	@media (max-width: 479px) {
+		header {
+			padding: 0 0.75rem;
+		}
+		
+		.logo {
+			font-size: 1.125rem;
+		}
+		
+		.user-menu {
+			right: -0.5rem;
+			min-width: 180px;
+		}
 	}
 </style>

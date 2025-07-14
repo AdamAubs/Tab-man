@@ -1,3 +1,2 @@
-// since there's no dynamic data here, we can prerender
-// it so that it gets served as a static asset in production
-export const prerender = true;
+// Can't prerender because we have server actions for logout
+export const prerender = false;

@@ -1,0 +1,72 @@
+erDiagram
+    %% Authentication and User Management
+    auth_users {
+        uuid id PK
+        string email
+        string encrypted_password
+        timestamptz created_at
+        timestamptz updated_at
+        jsonb raw_user_meta_data
+    }
+
+    profiles {
+        uuid id PK "FK to auth.users.id"
+        string email "UNIQUE, NOT NULL"
+        string display_name "nullable"
+        string avatar_url "nullable"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    %% Core Tab Management
+    tabs {
+        uuid id PK
+        string name "NOT NULL"
+        string description "nullable"
+        uuid created_by FK "NOT NULL"
+        timestamptz created_at
+        timestamptz updated_at
+        string status "CHECK: active|completed|archived"
+        decimal total_amount "DEFAULT 0"
+    }
+
+    tab_members {
+        uuid id PK
+        uuid tab_id FK "NOT NULL"
+        uuid user_id FK "NOT NULL"
+        timestamptz joined_at
+        string role "CHECK: owner|member"
+    }
+
+    tab_invitations {
+        uuid id PK
+        uuid tab_id FK "NOT NULL"
+        string email "NOT NULL"
+        uuid invited_by FK "NOT NULL"
+        timestamptz invited_at
+        string status "CHECK: pending|accepted|declined|expired"
+        string token "UNIQUE"
+    }
+
+    %% Places and Venues
+    places {
+        uuid id PK
+        uuid tab_id FK "NOT NULL"
+        string name "NOT NULL"
+        string address "nullable"
+        timestamptz added_at
+    }
+
+    %% Relationships
+    auth_users ||--|| profiles : "one-to-one"
+    auth_users ||--o{ tabs : "creates"
+    auth_users ||--o{ tab_members : "belongs_to"
+    auth_users ||--o{ tab_invitations : "invited_by"
+    
+    tabs ||--o{ tab_members : "has_members"
+    tabs ||--o{ tab_invitations : "has_invitations"
+    tabs ||--o{ places : "contains"
+
+    %% Unique Constraints
+    tab_members }o--|| tabs : "UNIQUE(tab_id, user_id)"
+    tab_invitations }o--|| tabs : "UNIQUE(tab_id, email)"
