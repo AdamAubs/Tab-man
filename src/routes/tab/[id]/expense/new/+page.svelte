@@ -49,58 +49,58 @@
 	let analysisError = $state('');
 
 	// Fake data for testing
-	function useFakeAnalyzedData() {
-		analyzedData = {
-			merchant: "Mario's Italian Restaurant",
-			items: [
-				{
-					name: 'Margherita Pizza',
-					description: 'Classic tomato, mozzarella, basil',
-					quantity: 2,
-					unitPrice: 18.5,
-					totalPrice: 37.0
-				},
-				{
-					name: 'Caesar Salad',
-					description: 'Romaine, parmesan, croutons',
-					quantity: 1,
-					unitPrice: 12.0,
-					totalPrice: 12.0
-				},
-				{
-					name: 'Tiramisu',
-					description: 'Classic Italian dessert',
-					quantity: 1,
-					unitPrice: 8.5,
-					totalPrice: 8.5
-				},
-				{
-					name: 'Wine - Chianti',
-					description: 'House red wine',
-					quantity: 1,
-					unitPrice: 24.0,
-					totalPrice: 24.0
-				}
-			],
-			totals: {
-				subtotal: 81.5,
-				tax: 7.34,
-				tip: 0.0, // Will be calculated
-				total: 88.84
-			}
-		};
+	// function useFakeAnalyzedData() {
+	// 	analyzedData = {
+	// 		merchant: "Mario's Italian Restaurant",
+	// 		items: [
+	// 			{
+	// 				name: 'Margherita Pizza',
+	// 				description: 'Classic tomato, mozzarella, basil',
+	// 				quantity: 2,
+	// 				unitPrice: 18.5,
+	// 				totalPrice: 37.0
+	// 			},
+	// 			{
+	// 				name: 'Caesar Salad',
+	// 				description: 'Romaine, parmesan, croutons',
+	// 				quantity: 1,
+	// 				unitPrice: 12.0,
+	// 				totalPrice: 12.0
+	// 			},
+	// 			{
+	// 				name: 'Tiramisu',
+	// 				description: 'Classic Italian dessert',
+	// 				quantity: 1,
+	// 				unitPrice: 8.5,
+	// 				totalPrice: 8.5
+	// 			},
+	// 			{
+	// 				name: 'Wine - Chianti',
+	// 				description: 'House red wine',
+	// 				quantity: 1,
+	// 				unitPrice: 24.0,
+	// 				totalPrice: 24.0
+	// 			}
+	// 		],
+	// 		totals: {
+	// 			subtotal: 81.5,
+	// 			tax: 7.34,
+	// 			tip: 0.0, // Will be calculated
+	// 			total: 88.84
+	// 		}
+	// 	};
 
-		setAnalyzedDataFromModel(analyzedData);
+	// 	setAnalyzedDataFromModel(analyzedData);
 
-		// Simulate having a receipt file for UI consistency
-		// Only run in the browser
-		if (typeof window !== 'undefined') {
-			receiptFile = new File(['fake'], 'fake-receipt.jpg', { type: 'image/jpeg' });
-			receiptPreview = '/receipt-img/01-the-grille.jpg';
-		}
+	// 	// Simulate having a receipt file for UI consistency
+	// 	// Only run in the browser
+	// 	if (typeof window !== 'undefined') {
+	// 		receiptFile = new File(['fake'], 'fake-receipt.jpg', { type: 'image/jpeg' });
+	// 		receiptPreview = '/receipt-img/01-the-grille.jpg';
+	// 	}
 
-		console.log('Using fake data for testing:', analyzedData);
-	}
+	// 	console.log('Using fake data for testing:', analyzedData);
+	// }
 
 	function handleFileSelect(event) {
 		const file = event.target.files[0];
@@ -242,7 +242,6 @@
 	// Recalculate subtotal and total based on current item prices.
 	// This is called whenever an item's price is edited
 	function recalculateTotals() {
-
 		if (!analyzedData || !analyzedData.items || !analyzedData.totals) return;
 
 		const currentItemSum = analyzedData.items.reduce(
@@ -332,7 +331,7 @@
 
 	<div class="expense-form">
 		<!-- Testing Controls -->
-		<div class="testing-controls">
+		<!-- <div class="testing-controls">
 			<h3>🧪 Testing Controls</h3>
 			<div class="test-buttons">
 				<button type="button" onclick={useFakeAnalyzedData} class="test-btn">
@@ -345,7 +344,7 @@
 			<p class="test-info">
 				Use fake data to test the expense flow without uploading images or calling the OpenAI API
 			</p>
-		</div>
+		</div> -->
 
 		{#if !receiptFile}
 			<!-- Upload Options   -->
@@ -597,7 +596,7 @@
 													min="0"
 													max="100"
 													bind:value={tipPercentage}
-													oninput={(e) => updateTipByPercentage(parseFloat(e.target.value) || 1.0)}
+													oninput={(e) => updateTipByPercentage(parseFloat(e.target.value) || 0.0)}
 												/>
 												<span class="input-symbol">%</span>
 											</div>
@@ -614,7 +613,7 @@
 													step="0.01"
 													min="0"
 													value={analyzedData.totals?.tip ?? ''}
-													oninput={(e) => updateTip(parseFloat(e.target.value) || 1.0)}
+													oninput={(e) => updateTip(parseFloat(e.target.value) || 0.0)}
 												/>
 											</div>
 										</div>
