@@ -10,6 +10,7 @@ export const actions: Actions = {
 			return fail(401, { error: 'You must be logged in to create a tab' });
 		}
 
+		console.log('User name: ', session);
 		console.log('User ID:', session.user.id);
 		console.log('User email:', session.user.email);
 
@@ -34,53 +35,44 @@ export const actions: Actions = {
 			});
 		}
 
-		try {
-			// Insert the new tab
-			const tabData = {
-				name: tabName.trim(),
-				description: description?.trim() || null,
-				created_by: session.user.id
-			};
+		// Insert the new tab
+		const tabData = {
+			name: tabName.trim(),
+			description: description?.trim() || null,
+			created_by: session.user.id
+		};
 
-			const { data: newTab, error: tabError } = await supabase
-				.from('tabs')
-				.insert(tabData)
-				.select('id')
-				.single();
+		const { data: newTab, error: tabError } = await supabase
+			.from('tabs')
+			.insert(tabData)
+			.select('id')
+			.single();
 
-			if (tabError) {
-				console.error('Error creating tab:', tabError);
-				return fail(500, { error: 'Failed to create tab', tabName, description });
-			}
-
-			// Add the creator as the owner in tab_members
-			const { error: memberError } = await supabase.from('tab_members').insert({
-				tab_id: newTab.id,
-				user_id: session.user.id,
-				role: 'owner'
-			});
-
-			if (memberError) {
-				console.error('Error adding tab member:', memberError);
-				// Note: The tab was created but adding member failed
-				// In a production app, you might want to implement transaction rollback
-				return fail(500, {
-					error: 'Tab created but failed to set permissions',
-					tabName,
-					description
-				});
-			}
-
-			// Success! Redirect to the new tab
-			throw redirect(303, `/tab/${newTab.id}`);
-		} catch (error) {
-			// If it's a redirect, re-throw it (this is expected for successful redirects)
-			if (error instanceof Response && error.status >= 300 && error.status < 400) {
-				throw error;
-			}
-
-			console.error('Unexpected error:', error);
-			return fail(500, { error: 'An unexpected error occurred', tabName, description });
+		if (tabError) {
+			console.error('Error creating tab:', tabError);
+			return fail(500, { error: 'Failed to create tab', tabName, description });
 		}
+
+		// Add the creator as the owner in tab_members
+		const { error: memberError } = await supabase.from('tab_members').insert({
+			tab_id: newTab.id,
+			user_id: session.user.id,
+			role: 'owner'
+		});
+
+
+		if (memberError) {
+			console.error('Error adding tab member:', memberError);
+			// Note: The tab was created but adding member failed
+			// In a production app, you might want to implement transaction rollback
+			return fail(500, {
+				error: 'Tab created but failed to set permissions',
+				tabName,
+				description
+			});
+		}
+
+		// Success! Redirect to the new tab
+		throw redirect(303, `/tab/${newTab.id}`);
 	}
 };

@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-
 	let { data, form } = $props();
 	let { user } = $derived(data);
 
@@ -33,21 +31,7 @@
 		{/if}
 
 		<!-- New Tab Form -->
-		<form
-			action="?/addTab"
-			method="post"
-			use:enhance={({ formData }) => {
-				// Ensure form data has the current values
-				formData.set('name', tabName);
-				formData.set('description', description);
-				
-				loading = true;
-				return async ({ update }) => {
-					await update();
-					loading = false;
-				};
-			}}
-		>
+		<form action="?/addTab" method="post">
 			<div class="form-group">
 				<label for="name">Tab Name *</label>
 				<input

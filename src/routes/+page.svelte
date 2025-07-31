@@ -1,36 +1,8 @@
 <script lang="ts">
-	import { Plus, Users, MapPin, CreditCard } from 'lucide-svelte';
+	import { CreditCard, Plus, Users } from 'lucide-svelte';
 
 	let { data } = $props();
-	let { user } = $derived(data);
-
-	// Mock tabs data - will be replaced with real data from database
-	const mockTabs = [
-		{
-			id: 1,
-			name: "Weekend Getaway",
-			description: "Trip to the mountains",
-			member_count: 4,
-			total_amount: 245.67,
-			place: "Aspen, CO"
-		},
-		{
-			id: 2,
-			name: "Dinner Party",
-			description: "Birthday celebration",
-			member_count: 6,
-			total_amount: 89.23,
-			place: "Mario's Restaurant"
-		},
-		{
-			id: 3,
-			name: "Office Lunch",
-			description: "Team lunch",
-			member_count: 8,
-			total_amount: 156.80,
-			place: "Downtown Cafe"
-		}
-	];
+	let { user, tabs } = $derived(data);
 </script>
 
 <svelte:head>
@@ -54,23 +26,31 @@
 
 		<!-- Tabs Grid -->
 		<div class="tabs-grid">
-			{#each mockTabs as tab (tab.id)}
-				<div class="tab-card">
+			{#each tabs as tab (tab.id)}
+				<a href="/tab/{tab.id}" class="tab-card">
 					<div class="tab-header">
 						<h3>{tab.name}</h3>
 						<span class="tab-amount">${tab.total_amount.toFixed(2)}</span>
 					</div>
-					<p class="tab-description">{tab.description}</p>
+					<p class="tab-description">{tab.description || 'No description'}</p>
 					<div class="tab-meta">
 						<div class="meta-item">
 							<Users size={14} />
 							<span>{tab.member_count} members</span>
 						</div>
 						<div class="meta-item">
-							<MapPin size={14} />
-							<span>{tab.place}</span>
+							<span class="role-badge role-{tab.user_role}">{tab.user_role}</span>
 						</div>
 					</div>
+				</a>
+			{:else}
+				<!-- Empty state -->
+				<div class="empty-state">
+					<p>No tabs yet. Create your first tab to get started!</p>
+					<a href="/new-tab" class="create-first-tab-btn">
+						<Plus size={16} />
+						Create First Tab
+					</a>
 				</div>
 			{/each}
 		</div>

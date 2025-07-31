@@ -1,7 +1,11 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	let { data } = $props();
+	let { redirectTo } = $state(data);
 
-	let isLogin = true;
+    // Extract tab ID from redirectTo if it's a tab URL
+ 	let tabId = $derived(redirectTo.match(/^\/tab\/([a-f0-9-]+)$/)?.[1] || null);
+
+	let isLogin = $state(true);
 	let loading = false;
 </script>
 
@@ -27,17 +31,11 @@
 				<h1>Welcome Back</h1>
 				<p>Sign in to your Tab Man account</p>
 
-				<form
-					method="POST"
-					action="?/login"
-					use:enhance={() => {
-						loading = true;
-						return async ({ update }) => {
-							await update();
-							loading = false;
-						};
-					}}
-				>
+				<form method="POST" action="?/login">
+					<input type="hidden" name="redirectTo" value={redirectTo} />
+					 {#if tabId}
+                		<input type="hidden" name="tabId" value={tabId} />
+            		{/if}
 					<div class="form-group">
 						<label for="email">Email</label>
 						<input
@@ -70,7 +68,9 @@
 				<div class="auth-footer">
 					<p>
 						Don't have an account?
-						<button type="button" onclick={() => (isLogin = false)} class="link-button">Sign up here</button>
+						<button type="button" onclick={() => (isLogin = false)} class="link-button"
+							>Sign up here</button
+						>
 					</p>
 				</div>
 			</div>
@@ -80,17 +80,8 @@
 				<h1>Join Tab Man</h1>
 				<p>Create your account to start splitting bills</p>
 
-				<form
-					method="POST"
-					action="?/signup"
-					use:enhance={() => {
-						loading = true;
-						return async ({ update }) => {
-							await update();
-							loading = false;
-						};
-					}}
-				>
+				<form method="POST" action="?/signup">
+					<input type="hidden" name="redirectTo" value={redirectTo} />
 					<div class="form-group">
 						<label for="displayName">Display Name</label>
 						<input
@@ -136,7 +127,9 @@
 				<div class="auth-footer">
 					<p>
 						Already have an account?
-						<button type="button" onclick={() => (isLogin = true)} class="link-button">Sign in here</button>
+						<button type="button" onclick={() => (isLogin = true)} class="link-button"
+							>Sign in here</button
+						>
 					</p>
 				</div>
 			</div>

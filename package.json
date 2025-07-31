@@ -21,6 +21,7 @@
 		"@fontsource/fira-mono": "^5.0.0",
 		"@neoconfetti/svelte": "^2.0.0",
 		"@sveltejs/adapter-auto": "^6.0.0",
+		"@sveltejs/adapter-node": "^5.2.13",
 		"@sveltejs/kit": "^2.22.0",
 		"@sveltejs/vite-plugin-svelte": "^6.0.0",
 		"@tailwindcss/forms": "^0.5.9",
@@ -49,6 +50,8 @@
 	"dependencies": {
 		"@supabase/ssr": "^0.6.1",
 		"@supabase/supabase-js": "^2.50.5",
-		"lucide-svelte": "^0.525.0"
+		"browser-image-compression": "^2.0.2",
+		"lucide-svelte": "^0.525.0",
+		"openai": "^5.9.2"
 	}
 }
